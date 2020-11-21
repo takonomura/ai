@@ -85,7 +85,7 @@ export default class 藍 {
 
 		this.log(`Lodaing the memory from ${file}...`);
 
-		this.db = new loki(file, {
+		this.db = new loki('data/' + file, {
 			autoload: true,
 			autosave: true,
 			autosaveInterval: 1000,
@@ -340,7 +340,8 @@ export default class 藍 {
 					options: meta
 				}
 			},
-			json: true
+			json: true,
+			headers: config.headers,
 		});
 		return res;
 	}
@@ -350,7 +351,9 @@ export default class 藍 {
 	 */
 	@autobind
 	public async post(param: any) {
-		const res = await this.api('notes/create', param);
+		const res = await this.api('notes/create', Object.assign({
+			channelId: (config.channelId && !param.replyId) ? config.channelId : undefined,
+		}, param));
 		return res.createdNote;
 	}
 
@@ -372,7 +375,8 @@ export default class 藍 {
 		return request.post(`${config.apiUrl}/${endpoint}`, {
 			json: Object.assign({
 				i: config.i
-			}, param)
+			}, param),
+			headers: config.headers,
 		});
 	};
 

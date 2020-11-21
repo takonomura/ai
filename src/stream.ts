@@ -21,7 +21,7 @@ export default class Stream extends EventEmitter {
 		this.state = 'initializing';
 		this.buffer = [];
 
-		this.stream = new ReconnectingWebsocket(`${config.wsUrl}/streaming?i=${config.i}`, [], {
+		this.stream = new ReconnectingWebsocket(`${config.wsUrl}${config.i}`, [], {
 			WebSocket: WebSocket
 		});
 		this.stream.addEventListener('open', this.onOpen);

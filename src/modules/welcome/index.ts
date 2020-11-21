@@ -17,7 +17,7 @@ export default class extends Module {
 	private onLocalNote(note: any) {
 		if (note.isFirstNote) {
 			setTimeout(() => {
-				this.ai.api('notes/create', {
+				this.ai.post({
 					renoteId: note.id
 				});
 			}, 3000);

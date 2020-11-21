@@ -424,8 +424,8 @@ class Session {
 		if (this.allowPost) {
 			const body = {
 				i: config.i,
+				channelId: config.channelId,
 				text: text,
-				visibility: 'home'
 			} as any;
 
 			if (renote) {
@@ -433,8 +433,9 @@ class Session {
 			}
 
 			try {
-				const res = await request.post(`${config.host}/api/notes/create`, {
-					json: body
+				const res = await request.post(`${config.apiUrl}/notes/create`, {
+					json: body,
+					headers: config.headers,
 				});
 
 				return res.createdNote;

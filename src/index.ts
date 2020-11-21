@@ -22,7 +22,6 @@ import FortuneModule from './modules/fortune';
 import GuessingGameModule from './modules/guessing-game';
 import KazutoriModule from './modules/kazutori';
 import KeywordModule from './modules/keyword';
-import WelcomeModule from './modules/welcome';
 import TimerModule from './modules/timer';
 import DiceModule from './modules/dice';
 import ServerModule from './modules/server';
@@ -53,7 +52,8 @@ promiseRetry(retry => {
 	return request.post(`${config.apiUrl}/i`, {
 		json: {
 			i: config.i
-		}
+		},
+		headers: config.headers,
 	}).catch(retry);
 }, {
 	retries: 3
@@ -76,7 +76,6 @@ promiseRetry(retry => {
 		new DiceModule(),
 		new TalkModule(),
 		new PingModule(),
-		new WelcomeModule(),
 		new ServerModule(),
 		new FollowModule(),
 		new BirthdayModule(),
