@@ -50,14 +50,8 @@ export default class extends Module {
 			return true;
 		}
 
-		if (text.match(/^(.+?)\s(.+)/)) {
-			text = text.replace(/^(.+?)\s/, '');
-		} else {
-			text = '';
-		}
-
-		const separatorIndex = text.indexOf(' ') > -1 ? text.indexOf(' ') : text.indexOf('\n');
-		const thing = text.substr(separatorIndex + 1).trim();
+		let thing = msg.extractedText.replace(/^(.+?)\s/, '').trim();
+		if (thing.includes('\n')) thing = thing.substr(0, thing.indexOf('\n')).trim();
 
 		if (thing === '' && msg.quoteId == null) {
 			msg.reply(serifs.reminder.invalid);
