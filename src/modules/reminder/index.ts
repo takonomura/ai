@@ -103,6 +103,7 @@ export default class extends Module {
 			this.unsubscribeReply(key);
 			return;
 		}
+		if (remind.userId !== msg.userId) return;
 
 		const done = msg.includes(['done', 'やった', 'やりました', 'はい']);
 		const cancel = msg.includes(['やめる', 'やめた', 'キャンセル']);
