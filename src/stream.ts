@@ -14,6 +14,7 @@ export default class Stream extends EventEmitter {
 	private sharedConnectionPools: Pool[] = [];
 	private sharedConnections: SharedConnection[] = [];
 	private nonSharedConnections: NonSharedConnection[] = [];
+	private keepaliveInterval: NodeJS.Timer | null;
 
 	constructor() {
 		super();
@@ -86,6 +87,12 @@ export default class Stream extends EventEmitter {
 				c.connect();
 			});
 		}
+
+		if (this.keepaliveInterval == null) {
+			this.keepaliveInterval = setInterval(() => {
+				this.stream.send('ping');
+			}, 10 * 1000);
+		}
 	}
 
 	/**
@@ -95,6 +102,10 @@ export default class Stream extends EventEmitter {
 	private onClose() {
 		this.state = 'reconnecting';
 		this.emit('_disconnected_');
+		if (this.keepaliveInterval != null) {
+			clearInterval(this.keepaliveInterval);
+			this.keepaliveInterval = null;
+		}
 	}
 
 	/**
@@ -102,6 +113,7 @@ export default class Stream extends EventEmitter {
 	 */
 	@autobind
 	private onMessage(message) {
+		if (message.data === 'pong') return;
 		const { type, body } = JSON.parse(message.data);
 
 		if (type == 'channel') {
