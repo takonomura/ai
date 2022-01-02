@@ -2,4 +2,4 @@
 !/src
 !/package.json
 !/.npmrc
-/tsconfig.json
+!/tsconfig.json
