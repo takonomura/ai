@@ -1,4 +1,4 @@
-FROM node:14.15 AS base
+FROM node:17.3.0 AS base
 
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends mecab libmecab-dev mecab-ipadic-utf8 \
