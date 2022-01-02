@@ -1,0 +1,8 @@
+services:
+  app:
+    image: ghcr.io/takonomura/ai:master
+    volumes:
+      - './config.json:/app/config.json:ro'
+      - './font.otf:/app/font.otf:ro'
+      - './data:/app/data'
+    restart: always
