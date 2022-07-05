@@ -339,6 +339,8 @@ export default {
 	reminder: {
 		invalid: 'うーん...？',
 
+		doneFromInvalidUser: 'イタズラはめっですよ！',
+
 		reminds: 'やること一覧です！',
 
 		notify: (name) => name ? `${name}、これやりましたか？` : `これやりましたか？`,
@@ -458,6 +460,9 @@ export default {
 			'にこー♪',
 			'ぷくー',
 			'にゃふぅ',
+			'藍が来ましたよ～',
+			'じー',
+			'はにゃ？',
 		],
 		want: item => `${item}、欲しいなぁ...`,
 		see: item => `お散歩していたら、道に${item}が落ちているのを見たんです！`,
