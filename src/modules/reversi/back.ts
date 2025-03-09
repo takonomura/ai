@@ -452,7 +452,7 @@ class Session {
 			}
 
 			try {
-				const res = await got.post(`${config.host}/api/notes/create`, {
+				const res = await got.post(`${config.apiUrl}/notes/create`, {
 					json: body
 					headers: config.headers,
 				}).json();
