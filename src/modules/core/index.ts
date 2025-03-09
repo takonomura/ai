@@ -1,15 +1,15 @@
-import autobind from 'autobind-decorator';
-import Module from '@/module';
-import Message from '@/message';
-import serifs from '@/serifs';
-import { safeForInterpolate } from '@/utils/safe-for-interpolate';
+import { bindThis } from '@/decorators.js';
+import Module from '@/module.js';
+import Message from '@/message.js';
+import serifs from '@/serifs.js';
+import { safeForInterpolate } from '@/utils/safe-for-interpolate.js';
 
 const titles = ['さん', 'くん', '君', 'ちゃん', '様', '先生'];
 
 export default class extends Module {
 	public readonly name = 'core';
 
-	@autobind
+	@bindThis
 	public install() {
 		return {
 			mentionHook: this.mentionHook,
@@ -17,7 +17,7 @@ export default class extends Module {
 		};
 	}
 
-	@autobind
+	@bindThis
 	private async mentionHook(msg: Message) {
 		if (!msg.text) return false;
 
@@ -30,16 +30,10 @@ export default class extends Module {
 		);
 	}
 
-	@autobind
+	@bindThis
 	private transferBegin(msg: Message): boolean  {
 		if (!msg.text) return false;
 		if (!msg.includes(['引継', '引き継ぎ', '引越', '引っ越し'])) return false;
-
-		// メッセージのみ
-		if (!msg.isDm) {
-			msg.reply(serifs.core.transferNeedDm);
-			return true;
-		}
 
 		const code = msg.friend.generateTransferCode();
 
@@ -48,7 +42,7 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private transferEnd(msg: Message): boolean  {
 		if (!msg.text) return false;
 		if (!msg.text.startsWith('「') || !msg.text.endsWith('」')) return false;
@@ -66,16 +60,13 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private setName(msg: Message): boolean  {
 		if (!msg.text) return false;
 		if (!msg.text.includes('って呼んで')) return false;
 		if (msg.text.startsWith('って呼んで')) return false;
 
-		// メッセージのみ
-		if (!msg.isDm) return true;
-
-		const name = msg.text.match(/^(.+?)って呼んで/)![1];
+		const name = msg.extractedText.match(/\s*(.+?)って呼んで/)![1];
 
 		if (name.length > 10) {
 			msg.reply(serifs.core.tooLong);
@@ -94,7 +85,7 @@ export default class extends Module {
 			msg.reply(serifs.core.setNameOk(name));
 		} else {
 			msg.reply(serifs.core.san).then(reply => {
-				this.subscribeReply(msg.userId, msg.isDm, msg.isDm ? msg.userId : reply.id, {
+				this.subscribeReply(msg.userId, reply.id, {
 					name: name
 				});
 			});
@@ -103,7 +94,7 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private modules(msg: Message): boolean  {
 		if (!msg.text) return false;
 		if (!msg.or(['modules'])) return false;
@@ -123,7 +114,7 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private version(msg: Message): boolean  {
 		if (!msg.text) return false;
 		if (!msg.or(['v', 'version', 'バージョン'])) return false;
@@ -135,7 +126,7 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private async contextHook(key: any, msg: Message, data: any) {
 		if (msg.text == null) return;
 
@@ -152,7 +143,7 @@ export default class extends Module {
 			done();
 		} else {
 			msg.reply(serifs.core.yesOrNo).then(reply => {
-				this.subscribeReply(msg.userId, msg.isDm, reply.id, data);
+				this.subscribeReply(msg.userId, reply.id, data);
 			});
 		}
 	}

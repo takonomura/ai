@@ -1,5 +1,6 @@
 type Config = {
 	host: string;
+	serverName?: string;
 	i: string;
 	channelId?: string;
 	headers?: any;
@@ -11,12 +12,21 @@ type Config = {
 	notingEnabled: boolean;
 	chartEnabled: boolean;
 	serverMonitoring: boolean;
+	checkEmojisEnabled?: boolean;
+	checkEmojisAtOnce?: boolean;
+	geminiProApiKey?: string;
+	pLaMoApiKey?: string;
+	prompt?: string;
+	aichatRandomTalkEnabled?: boolean;
+	aichatRandomTalkProbability?: string;
+	aichatRandomTalkIntervalMinutes?: string;
+	aichatGroundingWithGoogleSearchAlwaysEnabled?: boolean;
 	mecab?: string;
 	mecabDic?: string;
 	memoryDir?: string;
 };
 
-const config = require('../config.json');
+import config from '../config.json' with { type: 'json' };
 
 if (!config.wsUrl) config.wsUrl = config.host.replace('http', 'ws') + '/streaming?i=';
 if (!config.apiUrl) config.apiUrl = config.host + '/api';

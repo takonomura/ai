@@ -1,8 +1,8 @@
-import autobind from 'autobind-decorator';
-import * as loki from 'lokijs';
-import Module from '@/module';
-import Message from '@/message';
-import serifs from '@/serifs';
+import { bindThis } from '@/decorators.js';
+import loki from 'lokijs';
+import Module from '@/module.js';
+import Message from '@/message.js';
+import serifs from '@/serifs.js';
 
 export default class extends Module {
 	public readonly name = 'guessingGame';
@@ -16,7 +16,7 @@ export default class extends Module {
 		endedAt: number | null;
 	}>;
 
-	@autobind
+	@bindThis
 	public install() {
 		this.guesses = this.ai.getCollection('guessingGame', {
 			indices: ['userId']
@@ -28,7 +28,7 @@ export default class extends Module {
 		};
 	}
 
-	@autobind
+	@bindThis
 	private async mentionHook(msg: Message) {
 		if (!msg.includes(['数当て', '数あて'])) return false;
 
@@ -36,16 +36,6 @@ export default class extends Module {
 			userId: msg.userId,
 			isEnded: false
 		});
-
-		if (!msg.isDm) {
-			if (exist != null) {
-				msg.reply(serifs.guessingGame.alreadyStarted);
-			} else {
-				msg.reply(serifs.guessingGame.plzDm);
-			}
-
-			return true;
-		}
 
 		const secret = Math.floor(Math.random() * 100);
 
@@ -59,13 +49,13 @@ export default class extends Module {
 		});
 
 		msg.reply(serifs.guessingGame.started).then(reply => {
-			this.subscribeReply(msg.userId, msg.isDm, msg.isDm ? msg.userId : reply.id);
+			this.subscribeReply(msg.userId, reply.id);
 		});
 
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private async contextHook(key: any, msg: Message) {
 		if (msg.text == null) return;
 
@@ -93,7 +83,7 @@ export default class extends Module {
 
 		if (guess == null) {
 			msg.reply(serifs.guessingGame.nan).then(reply => {
-				this.subscribeReply(msg.userId, msg.isDm, reply.id);
+				this.subscribeReply(msg.userId, reply.id);
 			});
 			return;
 		}
@@ -131,7 +121,7 @@ export default class extends Module {
 
 		msg.reply(text).then(reply => {
 			if (!end) {
-				this.subscribeReply(msg.userId, msg.isDm, reply.id);
+				this.subscribeReply(msg.userId, reply.id);
 			}
 		});
 	}

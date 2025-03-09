@@ -1,12 +1,12 @@
-import autobind from 'autobind-decorator';
-import Module from '@/module';
-import Message from '@/message';
-import serifs from '@/serifs';
+import { bindThis } from '@/decorators.js';
+import Module from '@/module.js';
+import Message from '@/message.js';
+import serifs from '@/serifs.js';
 
 export default class extends Module {
 	public readonly name = 'timer';
 
-	@autobind
+	@bindThis
 	public install() {
 		return {
 			mentionHook: this.mentionHook,
@@ -14,7 +14,7 @@ export default class extends Module {
 		};
 	}
 
-	@autobind
+	@bindThis
 	private async mentionHook(msg: Message) {
 		const secondsQuery = (msg.text || '').match(/([0-9]+)秒/);
 		const minutesQuery = (msg.text || '').match(/([0-9]+)分/);
@@ -47,7 +47,6 @@ export default class extends Module {
 
 		// タイマーセット
 		this.setTimeoutWithPersistence(time, {
-			isDm: msg.isDm,
 			msgId: msg.id,
 			userId: msg.friend.userId,
 			time: str
@@ -56,20 +55,14 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private timeoutCallback(data) {
 		const friend = this.ai.lookupFriend(data.userId);
 		if (friend == null) return; // 処理の流れ上、実際にnullになることは無さそうだけど一応
 		const text = serifs.timer.notify(data.time, friend.name);
-		if (data.isDm) {
-			this.ai.sendMessage(friend.userId, {
-				text: text
-			});
-		} else {
-			this.ai.post({
-				replyId: data.msgId,
-				text: text
-			});
-		}
+		this.ai.post({
+			replyId: data.msgId,
+			text: text
+		});
 	}
 }

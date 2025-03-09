@@ -1,8 +1,13 @@
+version: '3'
 services:
   app:
-    image: ghcr.io/takonomura/ai:master
+    build:
+      context: .
+      args:
+        - enable_mecab=1
+    platform: linux/amd64
     volumes:
-      - './config.json:/app/config.json:ro'
-      - './font.otf:/app/font.otf:ro'
-      - './data:/app/data'
+      - './config.json:/ai/config.json:ro'
+      - './font.ttf:/ai/font.ttf:ro'
+      - './data:/ai/data'
     restart: always

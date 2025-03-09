@@ -1,21 +1,21 @@
-import autobind from 'autobind-decorator';
-import { HandlerResult } from '@/ai';
-import Module from '@/module';
-import Message from '@/message';
-import serifs, { getSerif } from '@/serifs';
-import getDate from '@/utils/get-date';
+import { bindThis } from '@/decorators.js';
+import { HandlerResult } from '@/ai.js';
+import Module from '@/module.js';
+import Message from '@/message.js';
+import serifs, { getSerif } from '@/serifs.js';
+import getDate from '@/utils/get-date.js';
 
 export default class extends Module {
 	public readonly name = 'talk';
 
-	@autobind
+	@bindThis
 	public install() {
 		return {
 			mentionHook: this.mentionHook,
 		};
 	}
 
-	@autobind
+	@bindThis
 	private async mentionHook(msg: Message) {
 		if (!msg.text) return false;
 
@@ -37,7 +37,7 @@ export default class extends Module {
 		);
 	}
 
-	@autobind
+	@bindThis
 	private greet(msg: Message): boolean {
 		if (msg.text == null) return false;
 
@@ -106,7 +106,7 @@ export default class extends Module {
 		return false;
 	}
 
-	@autobind
+	@bindThis
 	private erait(msg: Message): boolean {
 		const match = msg.extractedText.match(/(.+?)た(から|ので)(褒|ほ)めて/);
 		if (match) {
@@ -133,7 +133,7 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private omedeto(msg: Message): boolean {
 		if (!msg.includes(['おめでと'])) return false;
 
@@ -142,12 +142,9 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private nadenade(msg: Message): boolean {
 		if (!msg.includes(['なでなで'])) return false;
-
-		// メッセージのみ
-		if (!msg.isDm) return true;
 
 		//#region 1日に1回だけ親愛度を上げる(嫌われてない場合のみ)
 		if (msg.friend.love >= 0) {
@@ -177,12 +174,9 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private kawaii(msg: Message): boolean {
 		if (!msg.includes(['かわいい', '可愛い'])) return false;
-
-		// メッセージのみ
-		if (!msg.isDm) return true;
 
 		msg.reply(getSerif(
 			msg.friend.love >= 5 ? serifs.core.kawaii.love :
@@ -192,12 +186,9 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private suki(msg: Message): boolean {
 		if (!msg.or(['好き', 'すき'])) return false;
-
-		// メッセージのみ
-		if (!msg.isDm) return true;
 
 		msg.reply(
 			msg.friend.love >= 5 ? (msg.friend.name ? serifs.core.suki.love(msg.friend.name) : serifs.core.suki.normal) :
@@ -207,12 +198,9 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private hug(msg: Message): boolean {
 		if (!msg.or(['ぎゅ', 'むぎゅ', /^はぐ(し(て|よ|よう)?)?$/])) return false;
-
-		// メッセージのみ
-		if (!msg.isDm) return true;
 
 		//#region 前のハグから1分経ってない場合は返信しない
 		// これは、「ハグ」と言って「ぎゅー」と返信したとき、相手が
@@ -241,12 +229,9 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private humu(msg: Message): boolean {
 		if (!msg.includes(['踏んで'])) return false;
-
-		// メッセージのみ
-		if (!msg.isDm) return true;
 
 		msg.reply(
 			msg.friend.love >= 5 ? serifs.core.humu.love :
@@ -256,12 +241,9 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private batou(msg: Message): boolean {
 		if (!msg.includes(['罵倒して', '罵って'])) return false;
-
-		// メッセージのみ
-		if (!msg.isDm) return true;
 
 		msg.reply(
 			msg.friend.love >= 5 ? serifs.core.batou.love :
@@ -271,24 +253,18 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private itai(msg: Message): boolean {
 		if (!msg.or(['痛い', 'いたい']) && !msg.extractedText.endsWith('痛い')) return false;
-
-		// メッセージのみ
-		if (!msg.isDm) return true;
 
 		msg.reply(serifs.core.itai(msg.friend.name));
 
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private ote(msg: Message): boolean {
 		if (!msg.or(['お手'])) return false;
-
-		// メッセージのみ
-		if (!msg.isDm) return true;
 
 		msg.reply(
 			msg.friend.love >= 10 ? serifs.core.ote.love2 :
@@ -298,7 +274,7 @@ export default class extends Module {
 		return true;
 	}
 
-	@autobind
+	@bindThis
 	private ponkotu(msg: Message): boolean | HandlerResult {
 		if (!msg.includes(['ぽんこつ'])) return false;
 
@@ -309,7 +285,7 @@ export default class extends Module {
 		};
 	}
 
-	@autobind
+	@bindThis
 	private rmrf(msg: Message): boolean | HandlerResult {
 		if (!msg.includes(['rm -rf'])) return false;
 
@@ -320,7 +296,7 @@ export default class extends Module {
 		};
 	}
 
-	@autobind
+	@bindThis
 	private shutdown(msg: Message): boolean | HandlerResult {
 		if (!msg.includes(['shutdown'])) return false;
 

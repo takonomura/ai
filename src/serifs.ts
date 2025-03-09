@@ -381,6 +381,20 @@ export default {
 		foryou: '描きました！'
 	},
 
+	checkCustomEmojis: {
+		post: (server_name, num) => `${server_name}に${num}件の絵文字が追加されました！`,
+		emojiPost: emoji => `:${emoji}:\n(\`${emoji}\`) #AddCustomEmojis`,
+		postOnce: (server_name, num, text) => `${server_name}に${num}件の絵文字が追加されました！\n${text} #AddCustomEmojis`,
+		emojiOnce: emoji => `:${emoji}:(\`${emoji}\`)`,
+		nothing: '絵文字を確認しましたが、なにも追加されていないみたいです',
+	},
+
+	aichat: {
+		nothing: type => `あぅ... ${type}のAPIキーが登録されてないみたいです`,
+		error: type => `うぇ...${type}でエラーが発生しちゃったみたいです。gemini-flashだと動くかも？`,
+		post: (text, type) => `${text} (${type}) #aichat`,
+	},
+
 	sleepReport: {
 		report: hours => `んぅ、${hours}時間くらい寝ちゃってたみたいです`,
 		reportUtatane: 'ん... うたた寝しちゃってました',

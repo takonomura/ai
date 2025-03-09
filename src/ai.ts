@@ -1,21 +1,22 @@
 // AI CORE
 
 import * as fs from 'fs';
-import autobind from 'autobind-decorator';
-import * as loki from 'lokijs';
-import * as request from 'request-promise-native';
-import * as chalk from 'chalk';
+import { bindThis } from '@/decorators.js';
+import loki from 'lokijs';
+import got from 'got';
+import { FormData, File } from 'formdata-node';
+import chalk from 'chalk';
 import { v4 as uuid } from 'uuid';
-const delay = require('timeout-as-promise');
 
-import config from '@/config';
-import Module from '@/module';
-import Message from '@/message';
-import Friend, { FriendDoc } from '@/friend';
-import { User } from '@/misskey/user';
-import Stream from '@/stream';
-import log from '@/utils/log';
-const pkg = require('../package.json');
+import config from '@/config.js';
+import Module from '@/module.js';
+import Message from '@/message.js';
+import Friend, { FriendDoc } from '@/friend.js';
+import type { User } from '@/misskey/user.js';
+import Stream from '@/stream.js';
+import log from '@/utils/log.js';
+import { sleep } from './utils/sleep.js';
+import pkg from '../package.json' with { type: 'json' };
 
 type MentionHook = (msg: Message) => Promise<boolean | HandlerResult>;
 type ContextHook = (key: any, msg: Message, data?: any) => Promise<void | boolean | HandlerResult>;
@@ -53,7 +54,6 @@ export default class 藍 {
 	private meta: loki.Collection<Meta>;
 
 	private contexts: loki.Collection<{
-		isDm: boolean;
 		noteId?: string;
 		userId?: string;
 		module: string;
@@ -104,12 +104,12 @@ export default class 藍 {
 		});
 	}
 
-	@autobind
+	@bindThis
 	public log(msg: string) {
-		log(chalk`[{magenta AiOS}]: ${msg}`);
+		log(`[${chalk.magenta('AiOS')}]: ${msg}`);
 	}
 
-	@autobind
+	@bindThis
 	private run() {
 		//#region Init DB
 		this.meta = this.getCollection('meta', {});
@@ -146,7 +146,7 @@ export default class 藍 {
 			if (data.text && data.text.startsWith('@' + this.account.username)) {
 				// Misskeyのバグで投稿が非公開扱いになる
 				if (data.text == null) data = await this.api('notes/show', { noteId: data.id });
-				this.onReceiveMessage(new Message(this, data, false));
+				this.onReceiveMessage(new Message(this, data));
 			}
 		});
 
@@ -156,7 +156,7 @@ export default class 藍 {
 			if (data.text && data.text.startsWith('@' + this.account.username)) return;
 			// Misskeyのバグで投稿が非公開扱いになる
 			if (data.text == null) data = await this.api('notes/show', { noteId: data.id });
-			this.onReceiveMessage(new Message(this, data, false));
+			this.onReceiveMessage(new Message(this, data));
 		});
 
 		// Renoteされたとき
@@ -174,7 +174,7 @@ export default class 藍 {
 		// メッセージ
 		mainStream.on('messagingMessage', data => {
 			if (data.userId == this.account.id) return; // 自分は弾く
-			this.onReceiveMessage(new Message(this, data, true));
+			this.onReceiveMessage(new Message(this, data));
 		});
 
 		// 通知
@@ -208,7 +208,7 @@ export default class 藍 {
 	 * ユーザーから話しかけられたとき
 	 * (メンション、リプライ、トークのメッセージ)
 	 */
-	@autobind
+	@bindThis
 	private async onReceiveMessage(msg: Message): Promise<void> {
 		this.log(chalk.gray(`<<< An message received: ${chalk.underline(msg.id)}`));
 
@@ -218,14 +218,10 @@ export default class 藍 {
 			return;
 		}
 
-		const isNoContext = !msg.isDm && msg.replyId == null;
+		const isNoContext = msg.replyId == null;
 
 		// Look up the context
-		const context = isNoContext ? null : this.contexts.findOne(msg.isDm ? {
-			isDm: true,
-			userId: msg.userId
-		} : {
-			isDm: false,
+		const context = isNoContext ? null : this.contexts.findOne({
 			noteId: msg.replyId
 		});
 
@@ -267,26 +263,19 @@ export default class 藍 {
 		//#endregion
 
 		if (!immediate) {
-			await delay(1000);
+			await sleep(1000);
 		}
 
-		if (msg.isDm) {
-			// 既読にする
-			this.api('messaging/messages/read', {
-				messageId: msg.id,
+		// リアクションする
+		if (reaction) {
+			this.api('notes/reactions/create', {
+				noteId: msg.id,
+				reaction: reaction
 			});
-		} else {
-			// リアクションする
-			if (reaction) {
-				this.api('notes/reactions/create', {
-					noteId: msg.id,
-					reaction: reaction
-				});
-			}
 		}
 	}
 
-	@autobind
+	@bindThis
 	private onNotification(notification: any) {
 		switch (notification.type) {
 			// リアクションされたら親愛度を少し上げる
@@ -302,7 +291,7 @@ export default class 藍 {
 		}
 	}
 
-	@autobind
+	@bindThis
 	private crawleTimer() {
 		const timers = this.timers.find();
 		for (const timer of timers) {
@@ -315,7 +304,7 @@ export default class 藍 {
 		}
 	}
 
-	@autobind
+	@bindThis
 	private logWaking() {
 		this.setMeta({
 			lastWakingAt: Date.now(),
@@ -325,7 +314,7 @@ export default class 藍 {
 	/**
 	 * データベースのコレクションを取得します
 	 */
-	@autobind
+	@bindThis
 	public getCollection(name: string, opts?: any): loki.Collection {
 		let collection: loki.Collection;
 
@@ -338,7 +327,7 @@ export default class 藍 {
 		return collection;
 	}
 
-	@autobind
+	@bindThis
 	public lookupFriend(userId: User['id']): Friend | null {
 		const doc = this.friends.findOne({
 			userId: userId
@@ -354,27 +343,24 @@ export default class 藍 {
 	/**
 	 * ファイルをドライブにアップロードします
 	 */
-	@autobind
-	public async upload(file: Buffer | fs.ReadStream, meta: any) {
-		const res = await request.post({
+	@bindThis
+	public async upload(file: Buffer | fs.ReadStream, meta: { filename: string, contentType: string }) {
+		const form = new FormData();
+		form.set('i', config.i);
+		form.set('file', new File([file], meta.filename, { type: meta.contentType }));
+
+		const res = await got.post({
 			url: `${config.apiUrl}/drive/files/create`,
-			formData: {
-				i: config.i,
-				file: {
-					value: file,
-					options: meta
-				}
-			},
-			json: true,
+			body: form,
 			headers: config.headers,
-		});
+		}).json();
 		return res;
 	}
 
 	/**
 	 * 投稿します
 	 */
-	@autobind
+	@bindThis
 	public async post(param: any) {
 		const res = await this.api('notes/create', Object.assign({
 			channelId: (config.channelId && !param.replyId) ? config.channelId : undefined,
@@ -385,44 +371,38 @@ export default class 藍 {
 	/**
 	 * 指定ユーザーにトークメッセージを送信します
 	 */
-	@autobind
+	@bindThis
 	public sendMessage(userId: any, param: any) {
-		return this.api('messaging/messages/create', Object.assign({
-			userId: userId,
+		return this.post(Object.assign({
+			visibility: 'specified',
+			visibleUserIds: [userId],
 		}, param));
 	}
 
 	/**
 	 * APIを呼び出します
 	 */
-	@autobind
+	@bindThis
 	public api(endpoint: string, param?: any) {
-		return request.post(`${config.apiUrl}/${endpoint}`, {
+		this.log(`API: ${endpoint}`);
+		return got.post(`${config.apiUrl}/${endpoint}`, {
 			json: Object.assign({
 				i: config.i
 			}, param),
 			headers: config.headers,
-		});
+		}).json();
 	};
 
 	/**
 	 * コンテキストを生成し、ユーザーからの返信を待ち受けます
 	 * @param module 待ち受けるモジュール名
 	 * @param key コンテキストを識別するためのキー
-	 * @param isDm トークメッセージ上のコンテキストかどうか
 	 * @param id トークメッセージ上のコンテキストならばトーク相手のID、そうでないなら待ち受ける投稿のID
 	 * @param data コンテキストに保存するオプションのデータ
 	 */
-	@autobind
-	public subscribeReply(module: Module, key: string | null, isDm: boolean, id: string, data?: any) {
-		this.contexts.insertOne(isDm ? {
-			isDm: true,
-			userId: id,
-			module: module.name,
-			key: key,
-			data: data
-		} : {
-			isDm: false,
+	@bindThis
+	public subscribeReply(module: Module, key: string | null, id: string, data?: any) {
+		this.contexts.insertOne({
 			noteId: id,
 			module: module.name,
 			key: key,
@@ -435,7 +415,7 @@ export default class 藍 {
 	 * @param module 解除するモジュール名
 	 * @param key コンテキストを識別するためのキー
 	 */
-	@autobind
+	@bindThis
 	public unsubscribeReply(module: Module, key: string | null) {
 		this.contexts.findAndRemove({
 			key: key,
@@ -450,7 +430,7 @@ export default class 藍 {
 	 * @param delay ミリ秒
 	 * @param data オプションのデータ
 	 */
-	@autobind
+	@bindThis
 	public setTimeoutWithPersistence(module: Module, delay: number, data?: any) {
 		const id = uuid();
 		this.timers.insertOne({
@@ -464,7 +444,7 @@ export default class 藍 {
 		this.log(`Timer persisted: ${module.name} ${id} ${delay}ms`);
 	}
 
-	@autobind
+	@bindThis
 	public getMeta() {
 		const rec = this.meta.findOne();
 
@@ -480,7 +460,7 @@ export default class 藍 {
 		}
 	}
 
-	@autobind
+	@bindThis
 	public setMeta(meta: Partial<Meta>) {
 		const rec = this.getMeta();
 
