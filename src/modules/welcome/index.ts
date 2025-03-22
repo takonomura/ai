@@ -6,6 +6,8 @@ export default class extends Module {
 
 	@bindThis
 	public install() {
+		if (!config.welcomeFirstNote) return {};
+
 		const tl = this.ai.connection.useSharedConnection('localTimeline');
 
 		tl.on('note', this.onLocalNote);

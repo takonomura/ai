@@ -12,6 +12,7 @@ type Config = {
 	notingEnabled: boolean;
 	chartEnabled: boolean;
 	serverMonitoring: boolean;
+	welcomeFirstNote: boolean;
 	checkEmojisEnabled?: boolean;
 	checkEmojisAtOnce?: boolean;
 	geminiProApiKey?: string;
