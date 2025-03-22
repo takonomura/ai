@@ -89,7 +89,7 @@ export default class 藍 {
 
 		this.log(`Lodaing the memory from ${file}...`);
 
-		this.db = new loki('data/' + file, {
+		this.db = new loki(file, {
 			autoload: true,
 			autosave: true,
 			autosaveInterval: 1000,
