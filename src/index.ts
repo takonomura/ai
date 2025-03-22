@@ -23,7 +23,7 @@ import KazutoriModule from './modules/kazutori/index.js';
 import KeywordModule from './modules/keyword/index.js';
 import TimerModule from './modules/timer/index.js';
 import DiceModule from './modules/dice/index.js';
-//import ServerModule from './modules/server/index.js';
+import ServerModule from './modules/server/index.js';
 import FollowModule from './modules/follow/index.js';
 import ValentineModule from './modules/valentine/index.js';
 import MazeModule from './modules/maze/index.js';
@@ -87,7 +87,7 @@ promiseRetry(retry => {
 		new TimerModule(),
 		new DiceModule(),
 		new PingModule(),
-		//new ServerModule(),
+		new ServerModule(),
 		new FollowModule(),
 		new BirthdayModule(),
 		new ValentineModule(),
