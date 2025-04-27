@@ -18,7 +18,7 @@ RUN git clone --depth 1 https://github.com/yokomotod/mecab-ipadic-neologd.git /t
 FROM base
 
 RUN apt-get update \
-	&& apt-get install -y --no-install-recommends tini \
+	&& apt-get install -y --no-install-recommends tini fonts-noto-cjk \
 	&& rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-dic /usr/lib/x86_64-linux-gnu/mecab/dic/mecab-ipadic-neologd /usr/lib/x86_64-linux-gnu/mecab/dic/mecab-ipadic-neologd

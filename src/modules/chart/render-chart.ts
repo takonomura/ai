@@ -1,4 +1,4 @@
-import { createCanvas, registerFont } from 'canvas';
+import { createCanvas } from 'canvas';
 
 const width = 1024 + 256;
 const height = 512 + 256;
@@ -32,8 +32,6 @@ type Chart = {
 };
 
 export function renderChart(chart: Chart) {
-	registerFont('./font.otf', { family: 'CustomFont' });
-
 	const canvas = createCanvas(width, height);
 	const ctx = canvas.getContext('2d');
 	ctx.antialias = 'default';
@@ -49,7 +47,7 @@ export function renderChart(chart: Chart) {
 
 	// Draw title
 	if (chart.title) {
-		ctx.font = `${titleTextSize}px CustomFont`;
+		ctx.font = `${titleTextSize}px "Noto Sans CJK JP"`;
 		const t = ctx.measureText(chart.title);
 		ctx.fillStyle = colors.text;
 		ctx.fillText(chart.title, (width / 2) - (t.width / 2), 128);
