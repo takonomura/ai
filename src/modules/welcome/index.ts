@@ -1,5 +1,6 @@
 import { bindThis } from '@/decorators.js';
 import Module from '@/module.js';
+import config from '@/config.js';
 
 export default class extends Module {
 	public readonly name = 'welcome';
